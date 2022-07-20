@@ -1,8 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <template id="report_package_barcode_extend" name="Extended Package Barcode" inherit_id="stock.report_package_barcode">
-        <xpath expr="//table[@class=''">
+    <record id="action_package_barcode_traveler_report" model="ir.actions.report">
+        <field name="name">Bin Label With Contents</field>
+        <field name="model">stock.quant.package</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rcp_powder_coating.report_package_barcode_traveler</field>
+        <field name="binding_model_id" ref="stock.model_stock_quant_package"/>
+        <field name="binding_type">report</field>
+    </record>
 
-        </xpath>
+    <template id="report_package_barcode_traveler">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <t>
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        <table class="table table-condensed" style="border-bottom: 0px solid white !important;">
+                            <tr>
+                                <th>
+                                    <h1 t-field="o.name" class="mt0 float-left" style="font-size:64px;"/>
+                                </th>
+                                <th name="td_pk_barcode" style="text-align: center">
+                                    <div t-field="o.name"
+                                         t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:300px;height:50px;'}"/>
+                                    <p t-field="o.name"/>
+                                </th>
+                            </tr>
+                        </table>
+                        <div class="row mt32 mb32">
+                            <div t-if="o.package_type_id" class="o_packaging_type col-auto">
+                                <strong>Package Type:</strong>
+                                <p t-field="o.package_type_id.name"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm" style="border-bottom: 0px solid white !important;">
+                            <t t-set="has_serial_number" t-value="o.quant_ids.mapped('lot_id')"/>
+                            <thead>
+                                <tr>
+                                    <th width="35%">Product</th>
+                                    <th name="th_barcode" width="30%" class="text-center">Product Barcode</th>
+                                    <th name="th_quantity" width="20%">Quantity</th>
+                                    <th name="th_barcode" width="15%" class="text-center">Qty Barcode</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size:36px;">
+                                <tr t-foreach="o.quant_ids" t-as="l">
+                                    <td width="35%">
+                                        <span t-field="l.product_id.name"/>
+                                    </td>
+                                    <td width="30%" class="text-center">
+                                        <div t-field="l.product_id.barcode"
+                                             t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>
+                                    </td>
+                                    <td width="20%">
+                                        <span t-field="l.quantity"/>
+                                    </td>
+                                    <td width="15%" class="text-center">
+                                        <div t-esc="str(l.quantity)"
+                                             t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="page-break-after:always"/>
+                </t>
+            </t>
+        </t>
     </template>
+    <!--    <template id="report_package_barcode_extend" name="Extended Package Barcode"-->
+    <!--              inherit_id="stock.report_package_barcode">-->
+    <!--        <xpath expr="//table[@class='table table-sm']" position="replace">-->
+    <!--            <table class="table table-sm" style="border-bottom: 0px solid white !important;">-->
+    <!--                <t t-set="has_serial_number" t-value="o.quant_ids.mapped('lot_id')"/>-->
+    <!--                <thead>-->
+    <!--                    <tr>-->
+    <!--                        <th width="35%">Product</th>-->
+    <!--                        <th name="th_barcode" width="30%" class="text-center">Product Barcode</th>-->
+    <!--                        <th name="th_quantity" width="20%">Quantity</th>-->
+    <!--                        <th name="th_barcode" width="15%" class="text-center">Qty Barcode</th>-->
+    <!--                    </tr>-->
+    <!--                </thead>-->
+    <!--                <tbody>-->
+    <!--                    <tr t-foreach="o.quant_ids" t-as="l" style="font-size:36px;">-->
+    <!--                        <td width="35%">-->
+    <!--                            <span t-field="l.product_id.name"/>-->
+    <!--                        </td>-->
+    <!--                        <td width="30%" class="text-center">-->
+    <!--                            <div t-field="l.product_id.barcode"-->
+    <!--                                 t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>-->
+    <!--                        </td>-->
+    <!--                        <td width="20%">-->
+    <!--                            <span t-field="l.quantity"/>-->
+    <!--                        </td>-->
+    <!--                        <td width="15%" class="text-center">-->
+    <!--                            <div t-esc="str(l.quantity)"-->
+    <!--                                 t-options="{'widget': 'barcode', 'width': 600, 'height': 100, 'img_style': 'width:100%;height:35px'}"/>-->
+    <!--                        </td>-->
+    <!--                    </tr>-->
+    <!--                </tbody>-->
+    <!--            </table>-->
+    <!--            <p style="page-break-after:always"/>-->
+    <!--        </xpath>-->
+    <!--    </template>-->
 </odoo>

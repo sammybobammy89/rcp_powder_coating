@@ -8,11 +8,11 @@
     "depends": ["base", "mail", "stock"],
     "application": True,
     "data": [
-        # "data/config.xml",
         "security/powder_coating_security.xml",
         "security/ir.model.access.csv",
         "reports/report_picking.xml",
-        "reports/report_related_production.xml"
+        "reports/report_related_production.xml",
+        "reports/report_package_barcode_extend.xml"
     ],
     "category": "RCP/Powder Coating",
 }
