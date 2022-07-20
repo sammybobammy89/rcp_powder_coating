@@ -18,18 +18,18 @@ class StockQuantPackage(models.Model):
                     move_line.qty_done = move_line.product_uom_qty
                 rec.picking_id.button_validate()
 
-    def button_autoschedule(self):
+    def button_receive_from_powder_coater(self):
         selected_ids = self.env.context.get('active_ids', [])
-        self.search([('id', 'in', selected_ids)]).autoschedule()
+        self.search([('id', 'in', selected_ids)]).receive_from_powder_coater()
 
-    def autoschedule(self):
+    def receive_from_powder_coater(self):
         for rec in self:
-            containers = rec.env['rcp_container.container'].search([('date_departure', '<=', rec.date_deadline),
-                                                                    ('state', '=', 'draft'),
-                                                                    ('air_freight', '=', False),
-                                                                    ('container_vendor_id.receipt_picking_type_id', '=',
-                                                                     rec.picking_type_id.id)],
-                                                                   order='date_departure desc')
-            if containers:
-                rec.container_id = containers[0].id
+            # todo receive from powder coater code
+            # check to make sure all pack is at powder coater
+            # idenity 8 digit parts
+            # unpack bin
+            # do backorder for mo, use mrp.production _split_productions method, does this complete mo as well?
+            # create delivery back order stock.picking _create_backorder method for delivery
+            # create delivery back order stock.picking _create_backorder method for receipt
+            print()
 

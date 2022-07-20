@@ -12,7 +12,8 @@
         "security/ir.model.access.csv",
         "reports/report_picking.xml",
         "reports/report_related_production.xml",
-        "reports/report_package_barcode_extend.xml"
+        "reports/report_package_barcode_extend.xml",
+        "views/package.xml",
     ],
     "category": "RCP/Powder Coating",
 }

@@ -1,0 +1,28 @@
+<odoo>
+    <record id="view_quant_package_form_extend" model="ir.ui.view">
+        <field name="name">Add Powder Coating Package Functionality to Form</field>
+        <field name="model">stock.quant.package</field>
+        <field name="inherit_id" ref="stock.view_quant_package_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@id='stock.package_location_group']" position="after">
+                <group name="weight">
+                    <field name="weight_out_lbs"/>
+                    <field name="weight_in_lbs"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quant_package_tree_extend" model="ir.ui.view">
+        <field name="name">Add Powder Coating Package Functionality to Tree</field>
+        <field name="model">stock.quant.package</field>
+        <field name="inherit_id" ref="stock.view_quant_package_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <header>
+                    <button name="button_receive_from_powder_coater" string="Receive From Powder Coater" type="object"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>
