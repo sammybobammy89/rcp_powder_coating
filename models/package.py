@@ -1,4 +1,5 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import UserError
 
 
 class StockQuantPackage(models.Model):
@@ -59,8 +60,9 @@ class StockQuantPackage(models.Model):
                 "picking_id").mapped("id"))
 
             receipt_pickings = self.env['stock.picking'].browse(distinct_receipt_picking_ids)
+            pc_mo_dict = {}
             for receipt_picking in receipt_pickings:
-                # receipt_move_line.picking_id.action_assign()
+
                 for receipt_move_line in [x for x in receipt_picking.move_line_ids if x.package_id.id == rec.id]:
                     # get all completed move lines delivery from sheet metal stock with matching package and origin
                     delivery_move_lines = rec.env['stock.move.line'].search(
@@ -68,15 +70,42 @@ class StockQuantPackage(models.Model):
                          ('state', '=', 'done'),
                          ('picking_id.location_id', '=', sm_stock_location_id),
                          ('picking_id.location_dest_id', '=', powder_coater_incoming_location_id),
-                         ('picking_id.origin', '=', receipt_move_line.picking_id.origin)])
+                         ('picking_id.origin', '=', receipt_picking.origin)])
                     # update done quantities for receipt move lines
                     for delivery_move_line_id in delivery_move_lines:
                         receipt_move_line.qty_done = receipt_move_line.qty_done + delivery_move_line_id.qty_done
+
+                    [pc_mo] = rec.env['mrp.production'].search([('state', 'not in', ['draft', 'done', 'cancel']),
+                                                                ('name', 'like', receipt_picking.origin)])
+
+                    pc_mo_dict.update({pc_mo.name: receipt_move_line.qty_done})
+
             # button validate must act on list of pickings all at once otherwise in the case of two deliveries
             # being in same bin will give error saying that you cannot move package to two places
-            receipt_pickings.with_context({'skip_backorder': True}).button_validate()
+            receipt_pickings.with_context({'skip_immediate': True, 'skip_backorder': True}).button_validate()
 
-            # unpack bin
-            # do backorder for mo, use mrp.production _split_productions method, does this complete mo as well?
-            # create delivery back order stock.picking _create_backorder method for delivery
-            # create delivery back order stock.picking _create_backorder method for receipt
+
+            for name, qty in pc_mo_dict.items():
+                [pc_mo] = rec.env['mrp.production'].search([('name', '=', name)])
+
+
+                move_complete = []
+                for move in pc_mo.move_raw_ids:
+                    move.quantity_done = move.quantity_done + qty
+                    if move.quantity_done == move.product_uom_qty:
+                        move_complete.append(True)
+                    elif move.quantity_done > move.product_uom_qty:
+                        raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
+                    else:
+                        move_complete.append(False)
+
+                if all(move_complete):
+                    pc_mo.qty_producing = pc_mo.product_uom_qty
+                    pc_mo.with_context({'skip_immediate': True, 'skip_backorder': True}).button_mark_done()
+                # if backorder_qty > 0:
+                #     pc_mo._split_productions({pc_mo: [qty, backorder_qty]})
+                    # pc_mo._split_productions()
+        # unpack bin
+        # do backorder for mo, use mrp.production _split_productions method, does this complete mo as well?
+        # create delivery back order stock.picking _create_backorder method for delivery
+        # create delivery back order stock.picking _create_backorder method for receipt
