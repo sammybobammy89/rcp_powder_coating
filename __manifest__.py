@@ -14,6 +14,8 @@
         "reports/report_related_production.xml",
         "reports/report_package_barcode_extend.xml",
         "views/package.xml",
+        "views/res_config_settings_views.xml",
+        "views/picking.xml"
     ],
     "category": "RCP/Powder Coating",
 }

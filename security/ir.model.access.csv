@@ -1,1 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_powder_coating_user,PowderCoatingUser,model_rcp_powder_coating_powder_coating_shipment,powder_coating_group_user,1,0,0,0
+access_powder_coating_manager,PowderCoatingManager,model_rcp_powder_coating_powder_coating_shipment,powder_coating_group_manager,1,1,1,1

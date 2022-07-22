@@ -4,6 +4,15 @@
         <field name="model">stock.quant.package</field>
         <field name="inherit_id" ref="stock.view_quant_package_form"/>
         <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="is_in_powder_coater_incoming" invisible="1"/>
+            </field>
+            <xpath expr="//button[@name='unpack']" position="before">
+                <button class="oe_highlight" style="margin-right:5px;" name="action_receive_powder_coating"
+                        type="object" string="Receive Powder Coating Package"
+                        attrs="{'invisible': [('is_in_powder_coater_incoming','=',False)]}"
+                        groups="rcp_powder_coating.powder_coating_group_manager"/>
+            </xpath>
             <xpath expr="//group[@id='stock.package_location_group']" position="after">
                 <group name="weight">
                     <field name="weight_out_lbs"/>

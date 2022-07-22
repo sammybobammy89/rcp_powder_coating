@@ -1,83 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-<!--        &lt;!&ndash; container user group &ndash;&gt;-->
-<!--        <record id="container_group_user" model="res.groups">-->
-<!--            <field name="name">User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container manager group&ndash;&gt;-->
-<!--        <record id="container_group_manager" model="res.groups">-->
-<!--            <field name="name">Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container vendor user group &ndash;&gt;-->
-<!--        <record id="container_vendor_group_user" model="res.groups">-->
-<!--            <field name="name">Vendor User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container vendor manager group&ndash;&gt;-->
-<!--        <record id="container_vendor_group_manager" model="res.groups">-->
-<!--            <field name="name">Vendor Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container set user group &ndash;&gt;-->
-<!--        <record id="container_set_group_user" model="res.groups">-->
-<!--            <field name="name">Container Set User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container set manager group&ndash;&gt;-->
-<!--        <record id="container_set_group_manager" model="res.groups">-->
-<!--            <field name="name">Container Set Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container spacing user group &ndash;&gt;-->
-<!--        <record id="container_spacing_group_user" model="res.groups">-->
-<!--            <field name="name">Container Spacing User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container spacing manager group&ndash;&gt;-->
-<!--        <record id="container_spacing_group_manager" model="res.groups">-->
-<!--            <field name="name">Container Spacing Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container type user group &ndash;&gt;-->
-<!--        <record id="container_type_group_user" model="res.groups">-->
-<!--            <field name="name">Container Type User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container type manager group&ndash;&gt;-->
-<!--        <record id="container_type_group_manager" model="res.groups">-->
-<!--            <field name="name">Container Type Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container line user group &ndash;&gt;-->
-<!--        <record id="container_line_group_user" model="res.groups">-->
-<!--            <field name="name">Container Line User</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>-->
-<!--        </record>-->
-<!--        &lt;!&ndash; container line manager group&ndash;&gt;-->
-<!--        <record id="container_line_group_manager" model="res.groups">-->
-<!--            <field name="name">Container Line Manager</field>-->
-<!--            <field name="category_id" ref="base.module_category_rcp_container"/>-->
-<!--            <field name="implied_ids" eval="[(4, ref('container_group_user'))]"/>-->
-<!--            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>-->
-<!--        </record>-->
+        <!-- powder coating user group -->
+        <record id="powder_coating_group_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="base.module_category_rcp_powder_coating"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- powder coating manager group-->
+        <record id="powder_coating_group_manager" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="base.module_category_rcp_powder_coating"/>
+            <field name="implied_ids" eval="[(4, ref('powder_coating_group_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
     </data>
 </odoo>
