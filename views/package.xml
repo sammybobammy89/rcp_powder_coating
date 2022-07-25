@@ -29,7 +29,7 @@
         <field name="arch" type="xml">
             <xpath expr="//tree" position="inside">
                 <header>
-                    <button name="button_receive_from_powder_coater" string="Receive From Powder Coater" type="object"/>
+                    <button name="action_receive_powder_coating" string="Receive From Powder Coater" type="object"/>
                 </header>
             </xpath>
         </field>

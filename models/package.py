@@ -47,65 +47,107 @@ class StockQuantPackage(models.Model):
         [product_id] = self.env['product.product'].search([('name', '=', coated_product_name)])
         return product_id
 
-    def action_receive_powder_coating(self):
-        powder_coater_incoming_location_id = self.get_powder_coater_incoming_location_id()
-        powder_coater_stock_location_id = self.get_powder_coater_stock_location_id()
-        sm_stock_location_id = self.get_sm_stock_location_id()
-        for rec in self:
-            distinct_receipt_picking_ids = set(rec.env['stock.move.line'].search(
-                [('package_id', '=', rec.id),
-                 ('state', '=', 'assigned'),
-                 ('picking_id.location_id', '=', powder_coater_incoming_location_id),
-                 ('picking_id.location_dest_id', '=', powder_coater_stock_location_id)], order="id").mapped(
-                "picking_id").mapped("id"))
+    def get_move_lines_state_location_origin(self, state, location_id, location_dest_id, origin):
+        return self.env['stock.move.line'].search(
+            [('result_package_id', '=', self.id),
+             ('state', '=', state),
+             ('picking_id.location_id', '=', location_id),
+             ('picking_id.location_dest_id', '=', location_dest_id),
+             ('picking_id.origin', '=', origin)])
 
-            receipt_pickings = self.env['stock.picking'].browse(distinct_receipt_picking_ids)
-            pc_mo_dict = {}
-            for receipt_picking in receipt_pickings:
+    def get_picking_ids_by_package_state_location(self, state, location_id, location_dest_id):
+        picking_ids = set(self.env['stock.move.line'].search(
+            [('package_id', '=', self.id),
+             ('state', '=', state),
+             ('picking_id.location_id', '=', location_id),
+             ('picking_id.location_dest_id', '=', location_dest_id)], order="id").mapped("picking_id").mapped("id"))
+        return self.env['stock.picking'].browse(picking_ids)
 
-                for receipt_move_line in [x for x in receipt_picking.move_line_ids if x.package_id.id == rec.id]:
-                    # get all completed move lines delivery from sheet metal stock with matching package and origin
-                    delivery_move_lines = rec.env['stock.move.line'].search(
-                        [('result_package_id', '=', rec.id),
-                         ('state', '=', 'done'),
-                         ('picking_id.location_id', '=', sm_stock_location_id),
-                         ('picking_id.location_dest_id', '=', powder_coater_incoming_location_id),
-                         ('picking_id.origin', '=', receipt_picking.origin)])
-                    # update done quantities for receipt move lines
-                    for delivery_move_line_id in delivery_move_lines:
-                        receipt_move_line.qty_done = receipt_move_line.qty_done + delivery_move_line_id.qty_done
+    def get_move_line_by_state_product_location_origins(self, ok_state_list, product_id, location_id, origin):
+        [move_line] = self.env['stock.move.line'].search([('state', 'in', ok_state_list),
+                                                          ('product_id', '=', product_id),
+                                                          ('picking_id.location_id', '=', location_id),
+                                                          ('picking_id.origin', '=', origin)], order="id")
+        return move_line
 
-                    [pc_mo] = rec.env['mrp.production'].search([('state', 'not in', ['draft', 'done', 'cancel']),
-                                                                ('name', 'like', receipt_picking.origin)])
+    def receive_uncoated_parts_at_powder_coater(self, powder_coater_receipts):
+        for powder_coater_receipt in powder_coater_receipts:
+            for move_line in [x for x in powder_coater_receipt.move_line_ids if x.package_id.id == self.id]:
+                delivery_move_lines = self.get_move_lines_state_location_origin('done',
+                                                                                self.get_sm_stock_location_id(),
+                                                                                self.get_powder_coater_incoming_location_id(),
+                                                                                powder_coater_receipt.origin)
+                for delivery_move_line_id in delivery_move_lines:
+                    move_line.qty_done = move_line.qty_done + delivery_move_line_id.qty_done
+        # button validate must act on list of pickings all at once otherwise in the case of two deliveries
+        # being in same bin will give error saying that you cannot move package to two places
+        powder_coater_receipts.with_context({'skip_immediate': True, 'skip_backorder': True}).button_validate()
+        return True
 
-                    pc_mo_dict.update({pc_mo.name: receipt_move_line.qty_done})
+    def set_powder_coat_delivery_packages_and_quantities(self, powder_coater_mos):
+        for powder_coater_mo in powder_coater_mos:
+            [delivery_move_line] = self.get_move_line_by_state_product_location_origins(
+                ['assigned', 'partially_available'],
+                powder_coater_mo.product_id.id,
+                self.get_powder_coater_stock_location_id(),
+                powder_coater_mo.origin)
 
-            # button validate must act on list of pickings all at once otherwise in the case of two deliveries
-            # being in same bin will give error saying that you cannot move package to two places
-            receipt_pickings.with_context({'skip_immediate': True, 'skip_backorder': True}).button_validate()
+            delivery_move_line.result_package_id = self.id
+            delivery_move_line.qty_done = powder_coater_mo.qty_producing
 
+        return True
 
-            for name, qty in pc_mo_dict.items():
-                [pc_mo] = rec.env['mrp.production'].search([('name', '=', name)])
+    def get_deliveries_from_powder_coater(self, origins):
+        return self.env['stock.picking'].search([('state', '=', 'assigned'),
+                                                 ('location_id', '=',
+                                                  self.get_powder_coater_stock_location_id()),
+                                                 ('origin', 'in', origins)])
 
+    def get_coated_receipts(self, origins):
+        return self.env['stock.move.line'].search([('picking_id.state', '=', 'assigned'),
+                                                   ('package_id', '=', self.id),
+                                                   ('origin', 'in', origins)]).mapped("picking_id")
 
-                move_complete = []
+    def complete_powder_coating_manufacturing_orders(self, powder_coater_receipts):
+        pc_mo_ids = []
+        for receipt_picking in powder_coater_receipts:
+            for receipt_move_line in [x for x in receipt_picking.move_line_ids if x.package_id.id == self.id]:
+                [pc_mo] = self.env['mrp.production'].search([('state', 'not in', ['draft', 'done', 'cancel']),
+                                                             ('name', 'like', receipt_picking.origin + '%')])
+                pc_mo.qty_producing = receipt_move_line.qty_done
+                if pc_mo.qty_producing != pc_mo.product_uom_qty:
+                    pc_mo._split_productions()
                 for move in pc_mo.move_raw_ids:
-                    move.quantity_done = move.quantity_done + qty
-                    if move.quantity_done == move.product_uom_qty:
-                        move_complete.append(True)
-                    elif move.quantity_done > move.product_uom_qty:
-                        raise UserError(_('Impossible to plan the workorder. Please check the workcenter availabilities.'))
-                    else:
-                        move_complete.append(False)
+                    move.quantity_done = pc_mo.qty_producing
+                pc_mo.with_context({'skip_immediate': True, 'skip_backorder': True}).button_mark_done()
+                pc_mo_ids.append(pc_mo.id)
 
-                if all(move_complete):
-                    pc_mo.qty_producing = pc_mo.product_uom_qty
-                    pc_mo.with_context({'skip_immediate': True, 'skip_backorder': True}).button_mark_done()
-                # if backorder_qty > 0:
-                #     pc_mo._split_productions({pc_mo: [qty, backorder_qty]})
-                    # pc_mo._split_productions()
-        # unpack bin
-        # do backorder for mo, use mrp.production _split_productions method, does this complete mo as well?
-        # create delivery back order stock.picking _create_backorder method for delivery
-        # create delivery back order stock.picking _create_backorder method for receipt
+        return self.env['mrp.production'].browse(set(pc_mo_ids))
+
+    def action_receive_powder_coating(self):
+        for rec in self:
+            powder_coater_receipts = self.get_picking_ids_by_package_state_location(
+                'assigned',
+                rec.get_powder_coater_incoming_location_id(),
+                rec.get_powder_coater_stock_location_id())
+
+            rec.receive_uncoated_parts_at_powder_coater(powder_coater_receipts)
+            powder_coater_mos = rec.complete_powder_coating_manufacturing_orders(powder_coater_receipts)
+            rec.set_powder_coat_delivery_packages_and_quantities(powder_coater_mos)
+            origins = powder_coater_mos.mapped('origin')
+            powder_coater_deliveries = rec.get_deliveries_from_powder_coater(origins)
+            powder_coater_deliveries.with_context({'skip_immediate': True,
+                                                   'skip_backorder': True,
+                                                   'skip_sms': True}).button_validate()
+
+            coated_part_receipts = rec.get_coated_receipts(origins)
+            coated_part_receipts.action_set_quantities_to_reservation()
+            coated_part_receipts.with_context({'skip_immediate': True,
+                                               'skip_backorder': True,
+                                               'skip_sms': True}).button_validate()
+
+    def receive_from_powder_coater(self):
+        selected_ids = self.env.context.get('active_ids', [])
+        packages = self.search([('id', 'in', selected_ids)])
+        [rec.action_receive_powder_coating() for rec in packages]
+        return True
