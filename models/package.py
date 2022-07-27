@@ -126,7 +126,7 @@ class StockQuantPackage(models.Model):
 
     def action_receive_powder_coating(self):
         for rec in self:
-            powder_coater_receipts = self.get_picking_ids_by_package_state_location(
+            powder_coater_receipts = rec.get_picking_ids_by_package_state_location(
                 'assigned',
                 rec.get_powder_coater_incoming_location_id(),
                 rec.get_powder_coater_stock_location_id())
@@ -145,9 +145,3 @@ class StockQuantPackage(models.Model):
             coated_part_receipts.with_context({'skip_immediate': True,
                                                'skip_backorder': True,
                                                'skip_sms': True}).button_validate()
-
-    def receive_from_powder_coater(self):
-        selected_ids = self.env.context.get('active_ids', [])
-        packages = self.search([('id', 'in', selected_ids)])
-        [rec.action_receive_powder_coating() for rec in packages]
-        return True

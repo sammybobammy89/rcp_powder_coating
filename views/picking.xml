@@ -7,18 +7,60 @@
         <field name="arch" type="xml">
             <field name="picking_type_id" position="after">
                 <field name="sourced_from_sm_stock_location" invisible="1"/>
+                <field name="is_origin_mo_229_kit" invisible="1"/>
+                <field name="contains_single_product" invisible="1"/>
+                <field name="contains_uc_products" invisible="1"/>
             </field>
             <xpath expr="//button[@name='action_put_in_pack']" position="before">
-                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_pack" type="object" string="Pack For Powder Coating"
-                        attrs="{'invisible': ['|',('state', 'in', ('draft', 'done', 'cancel')),('sourced_from_sm_stock_location','=',False)]}"
+                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_pack" type="object"
+                        string="Pack For Powder Coating"
+                        attrs="{'invisible': ['|','|','|','|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('sourced_from_sm_stock_location','=',False),
+                        ('contains_single_product','=',False),
+                        ('contains_uc_products','=',False),
+                        ('is_origin_mo_229_kit', '=', True)]}"
                         groups="rcp_powder_coating.powder_coating_group_manager"/>
-                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_pack_separate" type="object" string="Pack Separately For Powder Coating"
-                        attrs="{'invisible': ['|',('state', 'in', ('draft', 'done', 'cancel')),('sourced_from_sm_stock_location','=',False)]}"
+                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_pack_separate"
+                        type="object" string="Pack Separately For Powder Coating"
+                        attrs="{'invisible': ['|','|','|','|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('sourced_from_sm_stock_location','=',False),
+                        ('contains_single_product','=',False),
+                        ('contains_uc_products','=',False),
+                        ('is_origin_mo_229_kit', '=', True)]}"
+                        groups="rcp_powder_coating.powder_coating_group_manager"/>
+                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_229_pack" type="object"
+                        string="Pack 229 Kit For Powder Coating"
+                        attrs="{'invisible': ['|','|','|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('sourced_from_sm_stock_location','=',False),
+                        ('contains_uc_products','=',False),
+                        ('is_origin_mo_229_kit', '=', False)]}"
+                        groups="rcp_powder_coating.powder_coating_group_manager"/>
+                <button class="oe_highlight" style="margin-right:5px;" name="action_put_in_pc_229_pack_separate"
+                        type="object" string="Pack 229 Kit Separately For Powder Coating"
+                        attrs="{'invisible': ['|','|','|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('sourced_from_sm_stock_location','=',False),
+                        ('contains_uc_products','=',False),
+                        ('is_origin_mo_229_kit', '=', False)]}"
+                        groups="rcp_powder_coating.powder_coating_group_manager"/>
+            </xpath>
+            <xpath expr="//button[@name='action_put_in_pack']" position="replace">
+                <button class="oe_highlight" style="margin-left:5px;" name="action_put_in_pack" type="object"
+                        string="Put in Pack"
+                        attrs="{'invisible': ['|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('contains_uc_products','=',True)]}"
                         groups="rcp_powder_coating.powder_coating_group_manager"/>
             </xpath>
             <xpath expr="//button[@name='action_put_in_pack']" position="after">
-                <button class="oe_highlight" style="margin-left:5px;" name="action_put_in_pack_separate" type="object" string="Put in Separate Packs"
-                        attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}"
+                <button class="oe_highlight" style="margin-left:5px;" name="action_put_in_pack_separate" type="object"
+                        string="Put in Separate Packs"
+                        attrs="{'invisible': ['|',
+                        ('state', 'in', ('draft', 'done', 'cancel')),
+                        ('contains_uc_products','=',True)]}"
                         groups="rcp_powder_coating.powder_coating_group_manager"/>
             </xpath>
         </field>

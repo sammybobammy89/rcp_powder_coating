@@ -31,11 +31,14 @@
                                     <div class="text-muted content-group mt16">
                                         <field name="powder_coater_stock_location_id"/>
                                     </div>
-                                    <span class="o_form_label">Package Type</span>
+                                    <span class="o_form_label">Single Piece Package Type</span>
                                     <div class="text-muted content-group mt16">
-                                        <field name="package_type_id"/>
+                                        <field name="pc_package_type_id"/>
                                     </div>
-
+                                    <span class="o_form_label">229 Kit Package Type</span>
+                                    <div class="text-muted content-group mt16">
+                                        <field name="pc_229_package_type_id"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
